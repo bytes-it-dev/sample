@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ms" data-lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Sistem Maklumat Pertanian Sabah (SMPS) — mockup paparan pengurusan data pertanian daerah.">
+  <title>Masuk — Sistem Maklumat Pertanian Sabah</title>
+
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+</head>
+<body class="login">
+
+  <main class="login__card">
+
+    <!-- Brand -->
+    <div class="login__brand">
+      <img class="login__logo" src="assets/img/logo.svg" alt="Jata Pertanian Sabah">
+      <h1 class="login__title">Sistem Maklumat Pertanian Sabah</h1>
+      <p class="login__subtitle">Jabatan Pertanian Sabah</p>
+    </div>
+
+    <div class="alert-box alert-box--info" role="note">
+      <span><strong>Paparan contoh (mockup).</strong> Sebarang ID pengguna dan
+      kata laluan diterima. Tiada pengesahan sebenar dijalankan.</span>
+    </div>
+
+    <form id="loginForm" novalidate>
+
+      <div class="form-group">
+        <div class="form-group__label">
+          <label for="userId">ID Pengguna <span class="required" aria-hidden="true">*</span></label>
+        </div>
+        <input type="text" id="userId" name="userId" autocomplete="username"
+               placeholder="cth. op.tawau" aria-describedby="userIdError" required>
+        <span class="field-error" id="userIdError" role="alert"></span>
+      </div>
+
+      <div class="form-group">
+        <div class="form-group__label">
+          <label for="password">Kata Laluan <span class="required" aria-hidden="true">*</span></label>
+        </div>
+        <input type="password" id="password" name="password"
+               autocomplete="current-password" placeholder="********"
+               aria-describedby="passwordError" required>
+        <span class="field-error" id="passwordError" role="alert"></span>
+      </div>
+
+      <!-- Shown only when the Operator role is selected (Section 4.1) -->
+      <div class="form-group" id="districtGroup" hidden>
+        <div class="form-group__label">
+          <label for="districtSelect">Daerah <span class="required" aria-hidden="true">*</span></label>
+        </div>
+        <select id="districtSelect" name="district" aria-describedby="districtError"></select>
+        <span class="form-hint">Operator hanya boleh mengakses data daerah sendiri.</span>
+        <span class="field-error" id="districtError" role="alert"></span>
+      </div>
+
+      <div class="form-group">
+        <fieldset class="form-fieldset">
+          <legend class="form-group__label">Peranan <span class="required" aria-hidden="true">*</span></legend>
+          <div class="radio-group" id="roleGroup">
+            <!-- Options are rendered from ROLE_ORDER in data.js -->
+          </div>
+        </fieldset>
+        <span class="field-error" id="roleError" role="alert"></span>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn--primary btn--lg btn--block" id="submitBtn">
+          Masuk
+        </button>
+      </div>
+    </form>
+
+    <p class="login__footer">
+      Versi mockup 1.0 &middot; Data contoh sahaja<br>
+      Jabatan Pertanian Sabah
+    </p>
+  </main>
+
+  <!-- Load order matters: data.js defines ROLES before auth.js reads it,
+       and the login script below uses both. -->
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script>
+  /* ==========================================================================
+     index.html — login / role selector logic
+     Purpose: render the role options from ROLE_ORDER, reveal the district
+              dropdown only for the Operator role, validate the required
+              fields, then store the role and route to the correct portal.
+     Dependencies: data.js (ROLE_ORDER, ROLES, DISTRICTS),
+                   auth.js (login, fillDistrictSelect, redirectIfLoggedIn).
+     Note: this page is the one exception to "no inline event handlers" by
+           omission rather than by breaking the rule — every listener below is
+           attached with addEventListener. There are no onclick attributes and
+           no inline <script> logic beyond this block, because Section 2 does
+           not allocate an index.js and Section 12 forbids adding files.
+     ========================================================================== */
+  (function () {
+    "use strict";
+
+    /* Already signed in? Go straight to the landing page for that role. */
+    redirectIfLoggedIn();
+
+    const form = document.getElementById("loginForm");
+    const userIdInput = document.getElementById("userId");
+    const passwordInput = document.getElementById("password");
+    const roleGroup = document.getElementById("roleGroup");
+    const districtGroup = document.getElementById("districtGroup");
+    const districtSelect = document.getElementById("districtSelect");
+
+    /* ------------------------------------------------------------------
+       1. Render the role options from data.js — one spelling of each label.
+       ------------------------------------------------------------------ */
+    const roleInputs = [];
+
+    ROLE_ORDER.forEach(function (roleId, index) {
+      const role = ROLES[roleId];
+
+      const label = document.createElement("label");
+      label.className = "radio-option";
+      label.setAttribute("for", "role-" + roleId);
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = "role";
+      input.id = "role-" + roleId;
+      input.value = roleId;
+      if (index === 0) input.checked = true;
+
+      const text = document.createElement("span");
+      text.className = "radio-option__text";
+      text.textContent = role.label;
+
+      label.appendChild(input);
+      label.appendChild(text);
+      roleGroup.appendChild(label);
+      roleInputs.push(input);
+    });
+
+    /* ------------------------------------------------------------------
+       2. District dropdown — filled once, shown only for Operator.
+       ------------------------------------------------------------------ */
+    fillDistrictSelect(districtSelect, { selected: "Tawau" });
+
+    function selectedRole() {
+      const checked = roleInputs.filter(function (input) { return input.checked; });
+      return checked.length ? checked[0].value : null;
+    }
+
+    /* The district field is required for an operator and irrelevant for the
+       other two roles, so it is hidden AND un-required rather than merely
+       hidden — a hidden required field would block a valid admin login. */
+    function syncDistrictVisibility() {
+      const isOperator = selectedRole() === "operator";
+      districtGroup.hidden = !isOperator;
+      districtSelect.required = isOperator;
+      if (!isOperator) clearError("district");
+    }
+
+    roleInputs.forEach(function (input) {
+      input.addEventListener("change", syncDistrictVisibility);
+    });
+    syncDistrictVisibility();
+
+    /* ------------------------------------------------------------------
+       3. Inline validation — red text under the field (Section 4.1).
+       Each key maps to the message slot and the control it belongs to, so
+       error handling is one table rather than a chain of lookups.
+       ------------------------------------------------------------------ */
+    const FIELDS = {
+      userId:   { error: "userIdError",   control: userIdInput },
+      password: { error: "passwordError", control: passwordInput },
+      district: { error: "districtError", control: districtSelect },
+      role:     { error: "roleError",     control: roleGroup }
+    };
+
+    function setFieldState(key, message) {
+      const field = FIELDS[key];
+      if (!field) return;
+
+      const slot = document.getElementById(field.error);
+      if (slot) slot.textContent = message || "";
+
+      const wrapper = field.control.closest
+        ? field.control.closest(".form-group")
+        : null;
+      if (wrapper) wrapper.classList.toggle("has-error", Boolean(message));
+    }
+
+    function clearError(key) {
+      setFieldState(key, "");
+    }
+
+    function clearAllErrors() {
+      Object.keys(FIELDS).forEach(clearError);
+    }
+
+    /* Validate every required field. Returns true when the form may submit. */
+    function validate() {
+      clearAllErrors();
+      let ok = true;
+      let firstInvalid = null;
+
+      function fail(key, control, message) {
+        setFieldState(key, message);
+        firstInvalid = firstInvalid || control;
+        ok = false;
+      }
+
+      if (userIdInput.value.trim() === "") {
+        fail("userId", userIdInput, "ID Pengguna diperlukan.");
+      }
+
+      if (passwordInput.value === "") {
+        fail("password", passwordInput, "Kata Laluan diperlukan.");
+      }
+
+      const roleId = selectedRole();
+      if (roleId === null) {
+        fail("role", roleInputs[0], "Sila pilih peranan.");
+      } else if (roleId === "operator" && districtSelect.value === "") {
+        fail("district", districtSelect, "Sila pilih daerah.");
+      }
+
+      if (firstInvalid) firstInvalid.focus();
+      return ok;
+    }
+
+    /* Clear a field's error as soon as the user starts fixing it. */
+    userIdInput.addEventListener("input", function () { clearError("userId"); });
+    passwordInput.addEventListener("input", function () { clearError("password"); });
+    districtSelect.addEventListener("change", function () { clearError("district"); });
+    roleInputs.forEach(function (input) {
+      input.addEventListener("change", function () { clearError("role"); });
+    });
+
+    /* ------------------------------------------------------------------
+       4. Submit — mock login, store the role, route to the portal.
+       ------------------------------------------------------------------ */
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      if (!validate()) return;
+
+      const roleId = selectedRole();
+      const district = roleId === "operator" ? districtSelect.value : null;
+
+      /* Any credentials are accepted (Section 8). auth.js stores the role under
+         localStorage key `smps_role` and the district in the session. */
+      const role = login(roleId, userIdInput.value.trim(), district);
+      if (!role) {
+        setFieldState("role", "Peranan tidak dikenali. Sila pilih semula.");
+        return;
+      }
+
+      goTo(role.landing);
+    });
+  })();
+  </script>
+</body>
+</html>

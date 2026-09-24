@@ -1,0 +1,397 @@
+/* ==========================================================================
+   base.css — Sistem Maklumat Pertanian Sabah (SMPS)
+   Covers: CSS custom properties (design tokens), modern reset,
+           base element defaults, heading scale, and typography rules.
+   Dependencies: none. Must be loaded before layout.css and components.css.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. DESIGN TOKENS
+   Colors, spacing, radii, shadows and font stack for the whole mockup.
+   Every other stylesheet consumes these variables — never hardcode a
+   raw color or pixel gap outside this block.
+   -------------------------------------------------------------------------- */
+:root {
+  /* Brand colours */
+  --color-primary: #1b5e20;        /* Sabah green */
+  --color-primary-dark: #0d3d12;
+  --color-accent: #f9a825;         /* harvest gold */
+
+  /* Semantic colours */
+  --color-danger: #c62828;
+  --color-warning: #ef6c00;
+  --color-success: #2e7d32;
+  --color-info: #1565c0;
+
+  /* Surfaces and text */
+  --color-bg: #f5f7f4;
+  --color-surface: #ffffff;
+  --color-text: #1a1a1a;
+  --color-muted: #6b7280;
+  --color-border: #e0e0e0;
+
+  /* Derived tints — used for badges, alert pills and table rows */
+  --color-danger-soft: #fdecea;
+  --color-warning-soft: #fff4e5;
+  --color-success-soft: #e8f5e9;
+  --color-info-soft: #e8f0fe;
+  --color-neutral-soft: #eceff1;
+
+  /* Radii */
+  --radius: 8px;
+  --radius-sm: 4px;
+  --radius-pill: 999px;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.10);
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Typography */
+  --font-base: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-size-base: 15px;
+  --line-height-base: 1.5;
+
+  /* Layout metrics shared across screens */
+  --header-height: 64px;
+  --content-max-width: 1280px;
+
+  /* Motion */
+  --transition-fast: 120ms ease-in-out;
+
+  /* Focus ring — one definition, reused everywhere for visible keyboard focus */
+  --focus-ring: 2px solid var(--color-info);
+  --focus-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   2. RESET
+   Predictable box model, no default margins, consistent form inheritance.
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Anchor links and in-page tab jumps should not hide content under the
+     sticky header defined in layout.css. */
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+blockquote,
+dl,
+dd,
+ul,
+ol {
+  margin: 0;
+}
+
+ul[class],
+ol[class] {
+  padding: 0;
+  list-style: none;
+}
+
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+}
+
+/* Respect users who ask for less motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. BASE ELEMENTS
+   -------------------------------------------------------------------------- */
+body {
+  font-family: var(--font-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Element selector instead of the [hidden] attribute so that any stylesheet
+   which later sets `display` on these elements cannot accidentally win. */
+[hidden] {
+  display: none !important;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   4. HEADINGS & TEXT
+   Headings are 600 weight per spec; the KPI numeral style (32px / 700)
+   lives with .kpi-card in components.css.
+   -------------------------------------------------------------------------- */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-text);
+}
+
+h1 {
+  font-size: 24px;
+}
+
+h2 {
+  font-size: 20px;
+}
+
+h3 {
+  font-size: 17px;
+}
+
+h4 {
+  font-size: 15px;
+}
+
+h5,
+h6 {
+  font-size: 14px;
+}
+
+p {
+  margin-bottom: var(--space-3);
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+small {
+  font-size: 12px;
+}
+
+strong,
+b {
+  font-weight: 600;
+}
+
+/* Utility text roles — used across all four screens */
+.text-muted {
+  color: var(--color-muted);
+}
+
+.text-danger {
+  color: var(--color-danger);
+}
+
+.text-warning {
+  color: var(--color-warning);
+}
+
+.text-success {
+  color: var(--color-success);
+}
+
+.text-info {
+  color: var(--color-info);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* Numbers should line up in tables, KPIs and charts */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   5. FOCUS VISIBILITY
+   Never remove focus outlines — restyle them so they pass contrast on both
+   light surfaces and the dark green header.
+   -------------------------------------------------------------------------- */
+:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+/* --------------------------------------------------------------------------
+   6. FORMS — baseline appearance only
+   Buttons, input chrome and validation states belong to components.css.
+   -------------------------------------------------------------------------- */
+label {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+input,
+select,
+textarea {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  width: 100%;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: var(--color-muted);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-primary);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-muted);
+  opacity: 1;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+/* Range input is used for "% Matang" — keep the slider track neutral and
+   let the accent colour show on the thumb. */
+input[type="range"] {
+  padding: 0;
+  border: none;
+  background: transparent;
+  accent-color: var(--color-primary);
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+  width: auto;
+  accent-color: var(--color-primary);
+}
+
+select {
+  cursor: pointer;
+}
+
+/* Disabled controls must not look interactive */
+input:disabled,
+select:disabled,
+textarea:disabled,
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* --------------------------------------------------------------------------
+   7. SCREEN-READER ONLY
+   For accessible labels on icon-only buttons and status text that is
+   communicated visually by colour alone.
+   -------------------------------------------------------------------------- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   8. SELECTION & SCROLLBAR POLISH
+   -------------------------------------------------------------------------- */
+::selection {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   9. PRINT BASE
+   Background colours and the tinted status fills must survive printing,
+   otherwise approved/rejected badges lose all meaning on paper.
+   -------------------------------------------------------------------------- */
+@media print {
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    background-color: #ffffff;
+  }
+}

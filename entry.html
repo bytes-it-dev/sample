@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ms" data-lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kemasukan Data — SMPS</title>
+
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <!-- ================= HEADER ================= -->
+    <header class="app__header header">
+      <button type="button" class="header__menu-btn btn btn--ghost btn--icon"
+              id="menuToggle" aria-label="Buka menu" aria-expanded="false"
+              aria-controls="sidebar"><span class="burger" aria-hidden="true"><span></span><span></span><span></span></span></button>
+
+      <div class="header__brand">
+        <img class="header__logo" src="assets/img/logo.svg" alt="">
+        <div class="header__titles">
+          <p class="header__title" id="pageTitle">Kemasukan Data Daerah</p>
+          <p class="header__subtitle">Sistem Maklumat Pertanian Sabah</p>
+        </div>
+      </div>
+
+      <p class="header__context" id="headerContext"></p>
+
+      <div class="header__actions">
+        <span class="badge badge--role" id="roleBadge"></span>
+        <button type="button" class="btn btn--ghost btn--sm" id="langToggle"
+                aria-label="Switch to English">EN</button>
+        <button type="button" class="btn btn--ghost btn--sm" id="logoutBtn">Log Keluar</button>
+      </div>
+    </header>
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="app__sidebar sidebar" id="sidebar">
+      <div class="sidebar__section">
+        <p class="sidebar__heading">Menu Operator</p>
+        <nav class="sidebar__nav" aria-label="Navigasi utama">
+          <a class="sidebar__link" href="entry.html" aria-current="page">Kemasukan Data</a>
+        </nav>
+      </div>
+
+      <div class="sidebar__section">
+        <p class="sidebar__heading">Tempoh Bertugas</p>
+        <div class="sidebar__meta">
+          <p><strong id="sidebarPeriod">—</strong></p>
+          <p>Daerah: <strong id="sidebarDistrict">—</strong></p>
+        </div>
+      </div>
+
+      <div class="sidebar__section">
+        <p class="sidebar__heading">Panduan Ringkas</p>
+        <div class="sidebar__meta">
+          <p>Satu rekod bagi setiap tanaman, lokasi dan tempoh.</p>
+          <p>Simpan sebagai draf untuk menyunting kemudian.</p>
+          <p>Hantar untuk semakan apabila data lengkap.</p>
+        </div>
+      </div>
+    </aside>
+    <button type="button" class="sidebar-backdrop" id="sidebarBackdrop"
+            aria-label="Tutup menu" hidden></button>
+
+    <!-- ================= MAIN ================= -->
+    <main class="app__main main">
+      <div class="container">
+
+        <!-- Period selector (past periods are read-only) -->
+        <div class="toolbar">
+          <div class="toolbar__group">
+            <label for="periodSelect">Tempoh Pelaporan</label>
+            <select id="periodSelect"></select>
+          </div>
+          <div class="toolbar__spacer"></div>
+          <div class="toolbar__group">
+            <span class="badge badge--neutral" id="periodState">—</span>
+          </div>
+        </div>
+
+        <div class="alert-box alert-box--info" id="lockedNotice" role="status" hidden>
+          <span>Tempoh ini telah dikunci. Rekod hanya boleh dilihat, tidak boleh
+          disunting.</span>
+        </div>
+
+        <div class="split">
+
+          <!-- ---------- LEFT: entry form ---------- -->
+          <section class="card" aria-labelledby="formHeading">
+            <div class="card__header">
+              <h2 class="card__title" id="formHeading">Rekod Baharu</h2>
+              <span class="badge badge--neutral" id="formMode">Baharu</span>
+            </div>
+
+            <div class="card__body">
+              <form id="entryForm" novalidate>
+                <input type="hidden" id="recordId" value="">
+
+                <div class="form-group">
+                  <div class="form-group__label">
+                    <label for="cropSelect">Jenis Tanaman <span class="required" aria-hidden="true">*</span></label>
+                  </div>
+                  <select id="cropSelect" required aria-describedby="cropError"></select>
+                  <span class="field-error" id="cropError" role="alert"></span>
+                </div>
+
+                <div class="form-group">
+                  <div class="form-group__label">
+                    <label for="categorySelect">Kategori <span class="required" aria-hidden="true">*</span></label>
+                  </div>
+                  <select id="categorySelect" required aria-describedby="categoryHint categoryError"></select>
+                  <span class="form-hint" id="categoryHint">Diisi automatik berdasarkan tanaman — boleh diubah.</span>
+                  <span class="field-error" id="categoryError" role="alert"></span>
+                </div>
+
+                <div class="form-group">
+                  <div class="form-group__label">
+                    <label for="areaInput">Lokasi / Area <span class="required" aria-hidden="true">*</span></label>
+                  </div>
+                  <input type="text" id="areaInput" list="areaOptions" maxlength="80"
+                         placeholder="cth. Kg. Melalap" required aria-describedby="areaError">
+                  <datalist id="areaOptions"></datalist>
+                  <span class="field-error" id="areaError" role="alert"></span>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <div class="form-group__label">
+                      <label for="luasInput">Luas (hektar) <span class="required" aria-hidden="true">*</span></label>
+                    </div>
+                    <input type="number" id="luasInput" step="0.1" min="0.1"
+                           placeholder="cth. 12.5" required aria-describedby="luasError">
+                    <span class="field-error" id="luasError" role="alert"></span>
+                    <div id="luasWarning" hidden></div>
+                  </div>
+
+                  <div class="form-group">
+                    <div class="form-group__label">
+                      <label for="tarikhSemai">Tarikh Semai <span class="required" aria-hidden="true">*</span></label>
+                    </div>
+                    <input type="date" id="tarikhSemai" required aria-describedby="tarikhError">
+                    <span class="field-error" id="tarikhError" role="alert"></span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <div class="form-group__label">
+                    <label for="matangRange">% Matang</label>
+                  </div>
+                  <div class="range-row">
+                    <input type="range" id="matangRange" min="0" max="100" step="1" value="0"
+                           aria-describedby="matangValue">
+                    <output class="range-value" id="matangValue" for="matangRange">0%</output>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <div class="form-group__label">
+                    <label for="catatanInput">Catatan</label>
+                  </div>
+                  <textarea id="catatanInput" maxlength="200" rows="3"
+                            placeholder="Pilihan — maksimum 200 aksara"
+                            aria-describedby="catatanCount"></textarea>
+                  <span class="char-count" id="catatanCount">0 / 200</span>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn btn--secondary" id="draftBtn">Simpan Draf</button>
+                  <button type="submit" class="btn btn--primary" id="submitBtn">Hantar untuk Semakan</button>
+                  <button type="button" class="btn btn--ghost" id="resetBtn" hidden>Batal Suntingan</button>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <!-- ---------- RIGHT: my records ---------- -->
+          <section class="card" aria-labelledby="recordsHeading">
+            <div class="card__header">
+              <h2 class="card__title" id="recordsHeading">Rekod Saya</h2>
+              <span class="count-chip" id="recordsCount">0</span>
+              <div class="card__actions">
+                <span class="badge badge--neutral" id="recordsPeriod">—</span>
+              </div>
+            </div>
+            <div class="card__body card__body--flush">
+              <div class="table-wrap">
+                <table class="table" id="recordsTable">
+                  <caption class="sr-only">Rekod yang direkodkan bagi tempoh dipilih</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Tanaman</th>
+                      <th scope="col">Area</th>
+                      <th scope="col" class="num">Luas (ha)</th>
+                      <th scope="col" class="num">% Matang</th>
+                      <th scope="col">Status</th>
+                      <th scope="col" class="col-actions">Tindakan</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recordsBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Load order: data -> auth -> shared -> page -->
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/shared.js"></script>
+  <script src="assets/js/entry.js"></script>
+</body>
+</html>
