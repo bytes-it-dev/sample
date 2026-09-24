@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ms" data-lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Konsol Pengesahan — SMPS</title>
+
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <!-- ================= HEADER ================= -->
+    <header class="app__header header">
+      <button type="button" class="header__menu-btn btn btn--ghost btn--icon"
+              id="menuToggle" aria-label="Buka menu" aria-expanded="false"
+              aria-controls="sidebar">☰</button>
+
+      <div class="header__brand">
+        <img class="header__logo" src="assets/img/logo.svg" alt="">
+        <div class="header__titles">
+          <p class="header__title" id="pageTitle">Konsol Pengesahan</p>
+          <p class="header__subtitle">Sistem Maklumat Pertanian Sabah</p>
+        </div>
+      </div>
+
+      <p class="header__context" id="headerContext"></p>
+
+      <div class="header__actions">
+        <span class="badge badge--role" id="roleBadge"></span>
+        <button type="button" class="btn btn--ghost btn--sm" id="langToggle"
+                aria-label="Switch to English">EN</button>
+        <button type="button" class="btn btn--ghost btn--sm" id="logoutBtn">Log Keluar</button>
+      </div>
+    </header>
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="app__sidebar sidebar" id="sidebar">
+      <div class="sidebar__section">
+        <p class="sidebar__heading">Menu Pentadbir</p>
+        <nav class="sidebar__nav" aria-label="Navigasi utama">
+          <a class="sidebar__link" href="verify.html" aria-current="page">Pengesahan Data</a>
+        </nav>
+      </div>
+
+      <div class="sidebar__section">
+        <p class="sidebar__heading">Ringkasan Tempoh</p>
+        <dl class="dl sidebar__meta" id="sidebarSummary"></dl>
+      </div>
+
+      <div class="sidebar__section">
+        <p class="sidebar__heading">Panduan</p>
+        <div class="sidebar__meta">
+          <p>Suntingan memerlukan sebab dan direkodkan dalam jejak audit.</p>
+          <p>Kelulusan menghantar data ke papan pemuka pengurusan.</p>
+        </div>
+      </div>
+    </aside>
+    <button type="button" class="sidebar-backdrop" id="sidebarBackdrop"
+            aria-label="Tutup menu" hidden></button>
+
+    <!-- ================= MAIN ================= -->
+    <main class="app__main main">
+      <div class="container">
+
+        <!-- Period selector -->
+        <div class="toolbar">
+          <div class="toolbar__group">
+            <label for="periodSelect">Tempoh</label>
+            <select id="periodSelect"></select>
+          </div>
+          <div class="toolbar__spacer"></div>
+          <div class="toolbar__group">
+            <span class="badge badge--neutral" id="periodState">—</span>
+          </div>
+        </div>
+
+        <!-- ---------- Filter bar ---------- -->
+        <div class="toolbar">
+          <div class="toolbar__group">
+            <label for="districtFilter">Daerah</label>
+            <select id="districtFilter"></select>
+          </div>
+          <div class="toolbar__group">
+            <label for="cropFilter">Tanaman</label>
+            <select id="cropFilter"></select>
+          </div>
+          <div class="toolbar__group">
+            <label for="statusFilter">Status</label>
+            <select id="statusFilter">
+              <option value="">Semua Status</option>
+              <option value="Dihantar">Dihantar</option>
+              <option value="Diluluskan">Diluluskan</option>
+              <option value="Ditolak">Ditolak</option>
+            </select>
+          </div>
+          <div class="toolbar__group toolbar__group--grow">
+            <label for="searchInput">Carian</label>
+            <input type="search" id="searchInput" class="search-input"
+                   placeholder="Daerah, tanaman, area atau catatan…">
+          </div>
+          <div class="toolbar__group">
+            <label for="resetFilterBtn">&nbsp;</label>
+            <button type="button" class="btn btn--secondary" id="resetFilterBtn">Set Semula</button>
+          </div>
+        </div>
+
+        <!-- ============ A. ANOMALI ============ -->
+        <section class="card card--danger" aria-labelledby="anomaliToggle">
+          <h2 class="sr-only" id="anomaliHeading">Anomali</h2>
+          <button type="button" class="section-toggle card__header card__header--danger"
+                  id="anomaliToggle" aria-expanded="true" aria-controls="anomaliPanel">
+            <span>Anomali</span>
+            <span class="count-chip" id="anomaliCount">0</span>
+            <span class="section-toggle__caret" aria-hidden="true">▾</span>
+          </button>
+          <div class="collapsible" id="anomaliPanel">
+            <div class="card__body card__body--flush">
+              <div class="table-wrap">
+                <table class="table" id="anomaliTable">
+                  <caption class="sr-only">Amaran anomali bagi tempoh dipilih</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Daerah</th>
+                      <th scope="col">Tanaman</th>
+                      <th scope="col">Isu</th>
+                      <th scope="col">Dikesan</th>
+                      <th scope="col">Status</th>
+                      <th scope="col" class="col-actions">Tindakan</th>
+                    </tr>
+                  </thead>
+                  <tbody id="anomaliBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ B. MENUNGGU SEMAKAN ============ -->
+        <section class="card card--warning" aria-labelledby="pendingHeading">
+          <h2 class="sr-only" id="pendingHeading">Menunggu Semakan</h2>
+          <button type="button" class="section-toggle card__header card__header--warning"
+                  id="pendingToggle" aria-expanded="true" aria-controls="pendingPanel">
+            <span>Menunggu Semakan</span>
+            <span class="count-chip" id="pendingCount">0</span>
+            <span class="section-toggle__caret" aria-hidden="true">▾</span>
+          </button>
+          <div class="collapsible" id="pendingPanel">
+            <div class="card__body card__body--flush">
+              <div class="table-wrap">
+                <table class="table" id="pendingTable">
+                  <caption class="sr-only">Rekod menunggu semakan</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col" class="col-check">
+                        <input type="checkbox" id="selectAllPending"
+                               aria-label="Pilih semua rekod menunggu semakan">
+                      </th>
+                      <th scope="col">Daerah</th>
+                      <th scope="col">Tanaman</th>
+                      <th scope="col">Area</th>
+                      <th scope="col" class="num">Luas (ha)</th>
+                      <th scope="col" class="num">% Matang</th>
+                      <th scope="col">Dihantar Oleh</th>
+                      <th scope="col" class="col-actions">Tindakan</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pendingBody"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="card__footer">
+              <div class="btn-group">
+                <button type="button" class="btn btn--success btn--sm" id="bulkApproveBtn">
+                  Lulus Semua Terpilih
+                </button>
+                <button type="button" class="btn btn--danger btn--sm" id="bulkRejectBtn">
+                  Tolak Semua Terpilih
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ C. DILULUSKAN ============ -->
+        <section class="card card--success" aria-labelledby="approvedHeading">
+          <h2 class="sr-only" id="approvedHeading">Diluluskan</h2>
+          <button type="button" class="section-toggle card__header card__header--success"
+                  id="approvedToggle" aria-expanded="true" aria-controls="approvedPanel">
+            <span>Diluluskan</span>
+            <span class="count-chip" id="approvedCount">0</span>
+            <span class="section-toggle__caret" aria-hidden="true">▾</span>
+          </button>
+          <div class="collapsible" id="approvedPanel">
+            <div class="card__body card__body--flush">
+              <div class="table-wrap">
+                <table class="table" id="approvedTable">
+                  <caption class="sr-only">Rekod yang telah diluluskan</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Daerah</th>
+                      <th scope="col">Tanaman</th>
+                      <th scope="col">Area</th>
+                      <th scope="col" class="num">Luas (ha)</th>
+                      <th scope="col" class="num">% Matang</th>
+                      <th scope="col">Jejak Audit</th>
+                      <th scope="col" class="col-actions">Tindakan</th>
+                    </tr>
+                  </thead>
+                  <tbody id="approvedBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ================= EDIT MODAL ================= -->
+  <div class="modal" id="editModal" role="dialog" aria-modal="true"
+       aria-labelledby="editModalTitle" hidden>
+    <div class="modal__dialog">
+      <div class="modal__header">
+        <h2 class="modal__title" id="editModalTitle">Sunting Rekod</h2>
+        <button type="button" class="modal__close" id="editModalClose"
+                aria-label="Tutup">×</button>
+      </div>
+
+      <form id="editForm" novalidate>
+        <div class="modal__body">
+          <p class="alert-box alert-box--info" id="editModalContext"></p>
+
+          <div class="form-group">
+            <div class="form-group__label">
+              <label for="editCrop">Jenis Tanaman</label>
+            </div>
+            <select id="editCrop"></select>
+          </div>
+
+          <div class="form-group">
+            <div class="form-group__label">
+              <label for="editCategory">Kategori</label>
+            </div>
+            <select id="editCategory"></select>
+          </div>
+
+          <div class="form-group">
+            <div class="form-group__label">
+              <label for="editArea">Lokasi / Area</label>
+            </div>
+            <input type="text" id="editArea" maxlength="80">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <div class="form-group__label">
+                <label for="editLuas">Luas (hektar)</label>
+              </div>
+              <input type="number" id="editLuas" step="0.1" min="0.1">
+              <span class="field-error" id="editLuasError" role="alert"></span>
+            </div>
+
+            <div class="form-group">
+              <div class="form-group__label">
+                <label for="editMatang">% Matang</label>
+              </div>
+              <div class="range-row">
+                <input type="range" id="editMatang" min="0" max="100" step="1">
+                <output class="range-value" id="editMatangValue" for="editMatang">0%</output>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-group__label">
+              <label for="editTarikh">Tarikh Semai</label>
+            </div>
+            <input type="date" id="editTarikh">
+          </div>
+
+          <div class="form-group">
+            <div class="form-group__label">
+              <label for="editCatatan">Catatan</label>
+            </div>
+            <textarea id="editCatatan" maxlength="200" rows="2"></textarea>
+            <span class="char-count" id="editCatatanCount">0 / 200</span>
+          </div>
+
+          <div class="form-group">
+            <div class="form-group__label">
+              <label for="editStatus">Status</label>
+            </div>
+            <select id="editStatus">
+              <option value="Dihantar">Dihantar</option>
+              <option value="Diluluskan">Diluluskan</option>
+              <option value="Ditolak">Ditolak</option>
+            </select>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="form-group">
+            <div class="form-group__label">
+              <label for="editReason">Sebab Suntingan <span class="required" aria-hidden="true">*</span></label>
+            </div>
+            <textarea id="editReason" rows="2" required
+                      placeholder="Wajib diisi — direkodkan dalam jejak audit"
+                      aria-describedby="editReasonError"></textarea>
+            <span class="field-error" id="editReasonError" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="modal__footer">
+          <button type="button" class="btn btn--secondary" id="editCancelBtn">Batal</button>
+          <button type="submit" class="btn btn--primary" id="editSaveBtn">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Load order: data -> auth -> shared -> page -->
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/shared.js"></script>
+  <script src="assets/js/verify.js"></script>
+</body>
+</html>

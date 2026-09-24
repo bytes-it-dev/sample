@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"
+     role="img" aria-label="Jata Pertanian Sabah">
+  <title>Jata Pertanian Sabah</title>
+
+  <!-- Shield body -->
+  <path d="M64 4 L116 20 V64 C116 96 94 116 64 124 C34 116 12 96 12 64 V20 Z"
+        fill="#1b5e20" stroke="#f9a825" stroke-width="3" stroke-linejoin="round"/>
+
+  <!-- Inner field -->
+  <path d="M64 16 L106 29 V64 C106 90 88 106 64 113 C40 106 22 90 22 64 V29 Z"
+        fill="#0d3d12"/>
+
+  <!-- Ground line -->
+  <path d="M24 92 Q64 84 104 92" fill="none" stroke="#f9a825" stroke-width="2.5"
+        stroke-linecap="round" opacity="0.85"/>
+
+  <!-- Oil palm: trunk -->
+  <path d="M64 92 C63 78 63 66 65 54" fill="none" stroke="#f9a825"
+        stroke-width="3.5" stroke-linecap="round"/>
+
+  <!-- Oil palm: fronds -->
+  <path d="M65 54 C54 48 40 48 30 55 C42 51 55 52 65 58 Z" fill="#f9a825"/>
+  <path d="M65 54 C76 48 90 48 100 55 C88 51 75 52 65 58 Z" fill="#f9a825"/>
+  <path d="M65 52 C58 41 46 35 34 35 C47 38 58 44 65 55 Z" fill="#f9a825"/>
+  <path d="M65 52 C72 41 84 35 96 35 C83 38 72 44 65 55 Z" fill="#f9a825"/>
+  <path d="M65 50 C62 38 62 30 66 22 C68 32 68 40 65 52 Z" fill="#f9a825"/>
+
+  <!-- Padi grain cluster -->
+  <g fill="#f9a825">
+    <circle cx="42" cy="76" r="4"/>
+    <circle cx="51" cy="71" r="4"/>
+    <circle cx="42" cy="65" r="4"/>
+    <circle cx="51" cy="60" r="4"/>
+    <circle cx="86" cy="76" r="4"/>
+    <circle cx="77" cy="71" r="4"/>
+    <circle cx="86" cy="65" r="4"/>
+    <circle cx="77" cy="60" r="4"/>
+  </g>
+
+  <!-- Base bar -->
+  <rect x="40" y="97" width="48" height="5" rx="2.5" fill="#1b5e20"
+        stroke="#f9a825" stroke-width="1.5"/>
+</svg>

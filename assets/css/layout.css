@@ -1,0 +1,627 @@
+/* ==========================================================================
+   layout.css — Sistem Maklumat Pertanian Sabah (SMPS)
+   Covers: page shell (sticky header + off-canvas sidebar + main region),
+           12-column grid and span helpers, content containers, page toolbars,
+           card structure, responsive breakpoints (768px / 480px) and the
+           print stylesheet used by [Cetak PDF].
+   Dependencies: base.css (design tokens) must be loaded first.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. PAGE SHELL
+   .app is a two-row grid: header spans full width, then a sidebar/main row.
+   Pages without a sidebar (dashboard.html, index.html) simply omit the
+   <aside> — the grid falls back to a single column on its own.
+   -------------------------------------------------------------------------- */
+.app {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  grid-template-rows: var(--header-height) minmax(0, 1fr);
+  grid-template-areas:
+    "header header"
+    "sidebar main";
+  min-height: 100vh;
+}
+
+.app__header {
+  grid-area: header;
+}
+
+.app__sidebar {
+  grid-area: sidebar;
+}
+
+.app__main {
+  grid-area: main;
+}
+
+/* Variant used by dashboard.html and index.html — no sidebar column at all */
+.app--no-sidebar {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "header"
+    "main";
+}
+
+/* --------------------------------------------------------------------------
+   2. HEADER — sticky, 64px
+   Sections: brand (logo + titles) | period/context | actions (role badge,
+   language stub, log out).
+   -------------------------------------------------------------------------- */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  height: var(--header-height);
+  padding: 0 var(--space-5);
+  background: linear-gradient(
+    100deg,
+    var(--color-primary) 0%,
+    var(--color-primary-dark) 100%
+  );
+  color: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0; /* allows the titles below to ellipsis instead of overflowing */
+}
+
+.header__logo {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.header__titles {
+  min-width: 0;
+}
+
+.header__title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header__subtitle {
+  font-size: 12px;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.78);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Period / context block sits in the middle and is pushed right by auto margin */
+.header__context {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-left: auto;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+}
+
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+/* Sidebar drawer toggle — hidden on desktop, shown at <=768px */
+.header__menu-btn {
+  display: none;
+}
+
+/* Buttons that sit on the dark green header need light chrome */
+.header .btn--ghost {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.header .btn--ghost:hover {
+  background-color: rgba(255, 255, 255, 0.14);
+  border-color: #ffffff;
+}
+
+.header :focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* Role badge on the header — white-tinted so it reads on dark green */
+.header .badge--role {
+  background-color: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   3. SIDEBAR — 240px, entry.html and verify.html only
+   Sticky under the header; becomes an off-canvas drawer at <=768px.
+   -------------------------------------------------------------------------- */
+.sidebar {
+  position: sticky;
+  top: var(--header-height);
+  height: calc(100vh - var(--header-height));
+  overflow-y: auto;
+  background-color: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  padding: var(--space-4) var(--space-3);
+}
+
+.sidebar__section {
+  margin-bottom: var(--space-5);
+}
+
+.sidebar__heading {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  padding: 0 var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: 14px;
+  text-decoration: none;
+  transition: background-color var(--transition-fast);
+}
+
+.sidebar__link:hover {
+  background-color: var(--color-bg);
+  text-decoration: none;
+}
+
+.sidebar__link[aria-current="page"] {
+  background-color: var(--color-success-soft);
+  color: var(--color-primary-dark);
+  font-weight: 600;
+}
+
+.sidebar__meta {
+  padding: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+/* Drawer backdrop — only rendered/visible in the mobile drawer state */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background-color: rgba(0, 0, 0, 0.45);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------------------
+   4. MAIN REGION & CONTAINERS
+   Max content width 1280px, centred, with responsive gutters.
+   -------------------------------------------------------------------------- */
+.main {
+  min-width: 0; /* prevents wide tables/canvases from blowing out the grid */
+  padding: var(--space-5);
+}
+
+.container {
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+}
+
+.container--narrow {
+  max-width: 480px;
+}
+
+/* --------------------------------------------------------------------------
+   5. GRID — 12 columns, gap = --space-4
+   Use .grid + .col-N. Spans wrap automatically on narrow screens via the
+   breakpoints in section 8.
+   -------------------------------------------------------------------------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.col-1  { grid-column: span 1; }
+.col-2  { grid-column: span 2; }
+.col-3  { grid-column: span 3; }
+.col-4  { grid-column: span 4; }
+.col-5  { grid-column: span 5; }
+.col-6  { grid-column: span 6; }
+.col-7  { grid-column: span 7; }
+.col-8  { grid-column: span 8; }
+.col-9  { grid-column: span 9; }
+.col-10 { grid-column: span 10; }
+.col-11 { grid-column: span 11; }
+.col-12 { grid-column: span 12; }
+
+/* Two-column page layout (entry.html form | records table) */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.split--even {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Vertical rhythm helpers. Used instead of inline style="margin-top:…" so the
+   "no inline styles" rule in Section 7 holds for stacked grids and cards. */
+.mt-3 { margin-top: var(--space-3); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-5 { margin-top: var(--space-5); }
+.mb-0 { margin-bottom: 0; }
+
+/* --------------------------------------------------------------------------
+   6. PAGE TOOLBAR
+   Filter bars and period selectors that sit directly under the header.
+   -------------------------------------------------------------------------- */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.toolbar__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 160px;
+}
+
+.toolbar__group--grow {
+  flex: 1 1 200px;
+}
+
+.toolbar__spacer {
+  margin-left: auto;
+}
+
+/* Compact controls inside a toolbar read better than full-width fields */
+.toolbar select,
+.toolbar input {
+  padding: var(--space-2) var(--space-3);
+  font-size: 14px;
+}
+
+/* --------------------------------------------------------------------------
+   7. CARD STRUCTURE
+   Visual chrome (.card) lives in components.css; the header/body/footer
+   skeleton lives here so every screen composes cards identically.
+   -------------------------------------------------------------------------- */
+.card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.card__title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.card__subtitle {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.card__actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.card__body {
+  padding: var(--space-4);
+}
+
+.card__body--flush {
+  padding: 0; /* for cards whose content is a full-bleed table */
+}
+
+.card__footer {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  border-bottom-left-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+}
+
+/* Collapsible section header used by verify.html (A / B / C sections) */
+.section-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+  color: inherit;
+  border-radius: var(--radius);
+}
+
+.section-toggle__caret {
+  margin-left: auto;
+  transition: transform var(--transition-fast);
+}
+
+.section-toggle[aria-expanded="false"] .section-toggle__caret {
+  transform: rotate(-90deg);
+}
+
+/* --------------------------------------------------------------------------
+   8. FILTER / KPI / CHART SIZING HELPERS
+   Canvas heights are set via CSS (not inline styles) so charts get a fixed
+   box on first paint and stay responsive afterwards.
+   -------------------------------------------------------------------------- */
+.chart-box {
+  position: relative;
+  width: 100%;
+  height: 280px;
+}
+
+.chart-box--tall {
+  height: 360px;
+}
+
+.chart-box--short {
+  height: 220px;
+}
+
+/* --------------------------------------------------------------------------
+   9. RESPONSIVE
+   <=768px: single column, sidebar becomes a drawer, header compresses.
+   <=480px: KPI cards one per row, tables scroll horizontally.
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .col-4 { grid-column: span 6; }
+  .col-3 { grid-column: span 6; }
+  .col-5 { grid-column: span 12; }
+}
+
+@media (max-width: 768px) {
+  .app,
+  .app--no-sidebar {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "header"
+      "main";
+  }
+
+  /* Sidebar leaves the grid flow and becomes an overlay drawer */
+  .sidebar {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    z-index: 50;
+    width: 240px;
+    max-width: 80vw;
+    transform: translateX(-100%);
+    transition: transform var(--transition-fast);
+    box-shadow: var(--shadow-md);
+  }
+
+  .sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .header {
+    padding: 0 var(--space-4);
+    gap: var(--space-3);
+  }
+
+  .header__menu-btn {
+    display: inline-flex;
+  }
+
+  /* Page title moves into the content area on small screens; the header
+     keeps only the product name so nothing collides. */
+  .header__context,
+  .header__subtitle {
+    display: none;
+  }
+
+  .main {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  /* Every span collapses to full width */
+  .col-1,  .col-2,  .col-3,  .col-4,  .col-5,  .col-6,
+  .col-7,  .col-8,  .col-9,  .col-10, .col-11, .col-12 {
+    grid-column: span 12;
+  }
+
+  .split,
+  .split--even {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .toolbar {
+    align-items: stretch;
+  }
+
+  .toolbar__group,
+  .toolbar__group--grow,
+  .toolbar__spacer {
+    flex: 1 1 100%;
+    min-width: 0;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .header__title {
+    font-size: 14px;
+  }
+
+  .header__logo {
+    width: 30px;
+    height: 30px;
+  }
+
+  .grid {
+    gap: var(--space-3);
+  }
+
+  /* Tables scroll horizontally rather than squeezing columns illegibly */
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-wrap .table {
+    min-width: 560px;
+  }
+
+  .chart-box {
+    height: 240px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   10. PRINT — [Cetak PDF]
+   Hide chrome and inactive tab panels, show only the active tab content,
+   A4 portrait with 1cm margins.
+   -------------------------------------------------------------------------- */
+@page {
+  size: A4 portrait;
+  margin: 1cm;
+}
+
+@media print {
+  /* 1. Hide all navigation, tabs and controls */
+  .header,
+  .sidebar,
+  .sidebar-backdrop,
+  .toolbar,
+  .tabs,
+  .btn,
+  .header__menu-btn,
+  .section-toggle__caret,
+  .no-print {
+    display: none !important;
+  }
+
+  /* 2. Show only the active tab content.
+        Panels are hidden with the `hidden` attribute by dashboard.js, and
+        its `display:none !important` would otherwise survive into print.
+        The panel that the JS marks aria-hidden="false" is the active one. */
+  .tab-panel[hidden] {
+    display: block !important;
+  }
+
+  .tab-panel[aria-hidden="true"] {
+    display: none !important;
+  }
+
+  /* 3. Verify.html collapsible sections: keep whatever the admin left open
+        printing, but never force closed sections open. */
+  .collapsible[hidden] {
+    display: none !important;
+  }
+
+  /* 4. Flatten the shell so the full page width is usable on paper */
+  .app,
+  .app--no-sidebar {
+    display: block;
+    min-height: 0;
+  }
+
+  .main {
+    padding: 0;
+  }
+
+  .container {
+    max-width: none;
+  }
+
+  /* 5. Keep card and table content from breaking mid-block */
+  .card,
+  .kpi-card,
+  .chart-panel {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #cccccc;
+  }
+
+  .table {
+    font-size: 11px;
+  }
+
+  .table thead th {
+    position: static; /* sticky headers are meaningless on paper */
+  }
+
+  tr,
+  img,
+  canvas {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* 6. Grids collapse so charts and tables are printed at full width */
+  .grid,
+  .split {
+    display: block;
+  }
+
+  .grid > *,
+  .split > * {
+    margin-bottom: var(--space-4);
+  }
+
+  /* 7. Print headings should name the report */
+  .print-only {
+    display: block !important;
+  }
+}
+
+/* Screen readers and the screen itself never need this */
+.print-only {
+  display: none;
+}
